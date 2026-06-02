@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->statefulApi();
+        // Comment out statefulApi() to prevent Sanctum from treating API requests as stateful SPA session requests.
+        // This ensures that stateless Bearer token auth works properly when frontend and backend share the same domain.
+        // $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
