@@ -47,22 +47,29 @@ class SoalController extends Controller
         // Path ke skrip Python AI
         $pythonScript = base_path('../ai_service/generate_soal.py');
 
-        // Bangun command (stderr ke NUL agar stdout bersih JSON)
+        // Deteksi OS untuk kompatibilitas Windows & Linux
+        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+        $pythonBin = $isWindows ? 'python' : base_path('../ai_service/venv/bin/python3');
+        $nullDevice = $isWindows ? 'NUL' : '/dev/null';
+
+        // Bangun command (stderr dibuang agar stdout bersih JSON)
         $command = sprintf(
-            'python %s --file_path=%s --jumlah_soal=%d --difficulty=%s --tipe_soal=%s --instruksi=%s 2>NUL',
+            '%s %s --file_path=%s --jumlah_soal=%d --difficulty=%s --tipe_soal=%s --instruksi=%s 2>%s',
+            escapeshellarg($pythonBin),
             escapeshellarg($pythonScript),
             escapeshellarg($filePath),
             intval($jumlahSoal),
             escapeshellarg($difficulty),
             escapeshellarg($tipeSoal),
-            escapeshellarg($instruksi)
+            escapeshellarg($instruksi),
+            $nullDevice
         );
 
         $output = shell_exec($command);
 
         if (!$output) {
             // Coba lagi dengan stderr ditangkap untuk debugging
-            $debugCommand = str_replace('2>NUL', '2>&1', $command);
+            $debugCommand = preg_replace('/2>[^ ]+$/', '2>&1', $command);
             $debugOutput = shell_exec($debugCommand);
             return response()->json([
                 'message' => 'Skrip Python tidak menghasilkan output.',
