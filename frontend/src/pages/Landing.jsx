@@ -14,7 +14,7 @@ export default function Landing() {
             <div className="bg-[#30D29E] p-1.5 rounded-lg">
               <Brain className="w-5 h-5 text-white" />
             </div>
-            {/* <span className="font-bold text-xl">ExamGenius</span> */}
+            <span className="font-bold text-xl hidden sm:inline">COK-GEN</span>
           </div>
           <div className="flex gap-4">
             <Link to="/login?role=admin" className="px-6 py-2.5 text-sm font-medium border border-[#234559] bg-[#1A3345] rounded-full hover:bg-[#234559] transition shadow-sm">
@@ -124,9 +124,9 @@ export default function Landing() {
       <footer className="bg-[#f8fafc] border-t border-gray-200 py-8 text-center">
         <div className="flex justify-center items-center gap-2 mb-2">
            <Brain className="w-5 h-5 text-[#0F5A7B]" />
-           {/* <span className="font-bold text-[#0F5A7B]">ExamGenius</span> */}
+           <span className="font-bold text-[#0F5A7B]">COK-GEN</span>
         </div>
-        <p className="text-gray-400 text-sm">© 2026 Sistem Pembuatan Ujian Otomatis Berbasis RAG & LLM</p>
+        <p className="text-gray-400 text-sm">© 2026 COK-GEN (Context-Oriented Knowledge Generator)</p>
       </footer>
     </div>
   );

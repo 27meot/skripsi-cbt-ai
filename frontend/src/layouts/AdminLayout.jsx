@@ -40,7 +40,7 @@ export default function AdminLayout({ children }) {
             <div className="bg-[#30D29E] p-1.5 rounded-lg mr-3">
               <Brain className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg tracking-wide">ExamGenius</span>
+            <span className="font-bold text-lg tracking-wide">COK-GEN</span>
           </div>
 
           {/* Navigation */}

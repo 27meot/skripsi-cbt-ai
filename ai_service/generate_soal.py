@@ -214,7 +214,7 @@ Format output WAJIB dalam JSON array tanpa komentar, seperti ini:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generator Soal AI - ExamGenius")
+    parser = argparse.ArgumentParser(description="Generator Soal AI - COK-GEN (Context-Oriented Knowledge Generator)")
     parser.add_argument("--file_path", required=True, help="Path absolut ke file PDF materi")
     parser.add_argument("--jumlah_soal", type=int, default=5, help="Jumlah soal yang dibuat")
     parser.add_argument("--difficulty", default="sedang", help="Tingkat kesulitan: mudah/sedang/sulit")
