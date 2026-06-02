@@ -73,13 +73,13 @@ export default function BuatUjian() {
 
   return (
     <AdminLayout>
-      <div className="h-16 flex items-center px-8 bg-white border-b border-gray-200 shrink-0">
-        <h1 className="font-bold text-gray-800 text-lg">Buat Ujian</h1>
+      <div className="h-14 md:h-16 flex items-center px-4 md:px-8 bg-white border-b border-gray-200 shrink-0">
+        <h1 className="font-bold text-gray-800 text-base md:text-lg">Buat Ujian</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8 bg-[#f8fafc]">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#f8fafc]">
         
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 w-full">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-8 w-full">
           
           {/* Header */}
           <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">

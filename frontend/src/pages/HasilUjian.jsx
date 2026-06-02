@@ -24,7 +24,7 @@ export default function HasilUjian() {
 
   return (
     <StudentLayout>
-      <div className="p-8 h-full overflow-y-auto">
+      <div className="p-4 md:p-8 h-full overflow-y-auto">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Riwayat Nilai</h1>
 
         {loading ? (

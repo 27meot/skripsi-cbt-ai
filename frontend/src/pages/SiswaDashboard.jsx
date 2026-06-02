@@ -26,7 +26,7 @@ export default function SiswaDashboard() {
 
   return (
     <StudentLayout>
-      <div className="p-8 h-full overflow-y-auto">
+      <div className="p-4 md:p-8 h-full overflow-y-auto">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Siswa</h1>
         
         {loading ? (

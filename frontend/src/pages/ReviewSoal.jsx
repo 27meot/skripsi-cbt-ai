@@ -103,14 +103,14 @@ export default function ReviewSoal() {
 
   return (
     <AdminLayout>
-      <div className="h-16 flex items-center justify-between px-8 bg-white border-b border-gray-200 shrink-0">
-        <div className="flex items-center gap-4">
+      <div className="min-h-14 md:h-16 flex flex-col md:flex-row items-start md:items-center justify-between px-4 md:px-8 py-2 md:py-0 gap-2 bg-white border-b border-gray-200 shrink-0">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
           <Link to="/buat-ujian" className="text-gray-400 hover:text-[#0ea5e9] transition">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="font-bold text-gray-800 text-lg">Review Soal: {ujianTitle}</h1>
-            <p className="text-xs text-gray-500 font-medium mt-0.5">Pilih soal yang ingin dipertahankan atau edit sebelum disimpan</p>
+            <h1 className="font-bold text-gray-800 text-sm md:text-lg truncate">Review Soal: {ujianTitle}</h1>
+            <p className="text-xs text-gray-500 font-medium mt-0.5 hidden md:block">Pilih soal yang ingin dipertahankan atau edit sebelum disimpan</p>
             {!evalSubmitted && (
               <p className="text-xs text-[#0ea5e9] font-bold mt-1 bg-blue-50 inline-block px-2 py-0.5 rounded">
                 * Mohon berikan penilaian evaluasi AI di bagian bawah halaman ini setelah selesai meninjau soal.
@@ -120,7 +120,7 @@ export default function ReviewSoal() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8 relative bg-[#f8fafc]">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 relative bg-[#f8fafc]">
         {error && (
           <div className="max-w-4xl mx-auto mb-6 bg-red-50 text-red-600 p-4 rounded-lg font-medium">
             {error}
@@ -272,7 +272,7 @@ export default function ReviewSoal() {
           </div>
         )}
 
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-[0_20px_40px_rgb(0,0,0,0.12)] border border-gray-100 p-2 pr-2.5 flex items-center gap-6 z-50">
+        <div className="fixed bottom-4 md:bottom-8 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto md:right-auto bg-white rounded-2xl md:rounded-full shadow-[0_20px_40px_rgb(0,0,0,0.12)] border border-gray-100 p-2 pr-2.5 flex items-center gap-4 md:gap-6 z-50">
           <div className="pl-6">
             <p className="text-sm font-medium text-gray-500">Terpilih: <span className="font-extrabold text-gray-900 text-lg mx-1">{selectedCount}</span> / {questions.length} Soal</p>
           </div>

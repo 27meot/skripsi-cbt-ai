@@ -29,11 +29,11 @@ export default function Siswa() {
 
   return (
     <AdminLayout>
-      <div className="h-16 flex items-center px-8 bg-white border-b border-gray-200 shrink-0">
-        <h1 className="font-bold text-gray-800 text-lg">Siswa</h1>
+      <div className="h-14 md:h-16 flex items-center px-4 md:px-8 bg-white border-b border-gray-200 shrink-0">
+        <h1 className="font-bold text-gray-800 text-base md:text-lg">Siswa</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8 bg-[#f8fafc]">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#f8fafc]">
         
         {/* Search */}
         <div className="relative mb-6">
@@ -49,8 +49,8 @@ export default function Siswa() {
           />
         </div>
 
-        {/* Table */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -64,7 +64,7 @@ export default function Siswa() {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-500">Memuat data siswa...</td>
+                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">Memuat data siswa...</td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
@@ -102,6 +102,44 @@ export default function Siswa() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-3">
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">Memuat data siswa...</div>
+          ) : filteredStudents.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">Belum ada data nilai siswa.</div>
+          ) : (
+            filteredStudents.map((student) => (
+              <Link 
+                key={student.id} 
+                to={`/siswa/${student.id}`}
+                className="block bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-50 p-2 rounded-full text-blue-500">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-800 text-sm block">{student.name}</span>
+                      <span className="text-xs text-gray-500">{student.class}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className={`text-lg font-bold ${student.avg >= 90 ? 'text-green-600' : student.avg >= 80 ? 'text-blue-600' : 'text-orange-500'}`}>
+                        {student.avg}
+                      </span>
+                      <p className="text-xs text-gray-400">{student.exams} ujian</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </div>
+                </div>
+              </Link>
+            ))
+          )}
         </div>
 
       </div>

@@ -35,12 +35,12 @@ export default function DaftarUjian() {
 
   return (
     <StudentLayout>
-      <div className="p-8 h-full overflow-y-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Mulai Ujian</h1>
-        <p className="text-gray-500 mb-8">Masukkan 6 digit Token Ujian yang diberikan oleh guru Anda.</p>
+      <div className="p-4 md:p-8 h-full overflow-y-auto">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">Mulai Ujian</h1>
+        <p className="text-gray-500 text-sm md:text-base mb-6 md:mb-8">Masukkan 6 digit Token Ujian yang diberikan oleh guru Anda.</p>
         
         {/* Token Search Form */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-xl mx-auto mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-8 max-w-xl mx-auto mb-8">
           <form onSubmit={handleSearch}>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

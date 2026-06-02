@@ -78,11 +78,11 @@ export default function BankSoal() {
 
   return (
     <AdminLayout>
-      <div className="h-16 flex items-center px-8 bg-white border-b border-gray-200 shrink-0">
-        <h1 className="font-bold text-gray-800 text-lg">Bank Soal</h1>
+      <div className="h-14 md:h-16 flex items-center px-4 md:px-8 bg-white border-b border-gray-200 shrink-0">
+        <h1 className="font-bold text-gray-800 text-base md:text-lg">Bank Soal</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8 bg-[#f8fafc] relative">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#f8fafc] relative">
         
         {/* Search */}
         <div className="relative mb-6">
@@ -118,7 +118,7 @@ export default function BankSoal() {
                     <div className="bg-blue-50 p-3 rounded-xl text-blue-500">
                       <BookOpen className="w-6 h-6" />
                     </div>
-                    <div className="flex-1 w-full flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div className="flex-1 w-full flex flex-col lg:flex-row lg:items-start justify-between gap-3 md:gap-4">
                       <div>
                         <h3 className="font-bold text-gray-900 text-lg mb-1">{exam.title}</h3>
                         <p className="text-xs text-gray-500 font-medium">

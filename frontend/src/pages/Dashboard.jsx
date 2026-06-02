@@ -62,11 +62,11 @@ export default function Dashboard() {
 
   return (
     <AdminLayout>
-      <div className="h-16 flex items-center px-8 bg-white border-b border-gray-200 shrink-0">
-        <h1 className="font-bold text-gray-800 text-lg">Dashboard</h1>
+      <div className="h-14 md:h-16 flex items-center px-4 md:px-8 bg-white border-b border-gray-200 shrink-0">
+        <h1 className="font-bold text-gray-800 text-base md:text-lg">Dashboard</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8">
         {/* Greeting */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Selamat datang, {user.name || 'Pengguna'}! 👋</h2>

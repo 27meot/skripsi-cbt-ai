@@ -96,11 +96,11 @@ export default function Materi() {
 
   return (
     <AdminLayout>
-      <div className="h-16 flex items-center px-8 bg-white border-b border-gray-200 shrink-0">
-        <h1 className="font-bold text-gray-800 text-lg">Materi</h1>
+      <div className="h-14 md:h-16 flex items-center px-4 md:px-8 bg-white border-b border-gray-200 shrink-0">
+        <h1 className="font-bold text-gray-800 text-base md:text-lg">Materi</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8">
         
         {/* Notifikasi */}
         {error && (
@@ -117,7 +117,7 @@ export default function Materi() {
         )}
 
         {/* Upload Area */}
-        <div className="bg-white border-2 border-dashed border-gray-200 hover:border-blue-400 transition-colors rounded-2xl p-12 flex flex-col items-center justify-center mb-8 shadow-sm">
+        <div className="bg-white border-2 border-dashed border-gray-200 hover:border-blue-400 transition-colors rounded-2xl p-6 md:p-12 flex flex-col items-center justify-center mb-8 shadow-sm">
           <div className="bg-blue-50 text-blue-500 p-4 rounded-full mb-5">
             {uploading ? <Loader2 className="w-8 h-8 animate-spin" /> : <Upload className="w-8 h-8" />}
           </div>
@@ -171,7 +171,7 @@ export default function Materi() {
         ) : (
           <div className="space-y-3">
             {filtered.map((item) => (
-              <div key={item.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between shadow-sm hover:border-[#0ea5e9] hover:shadow-md transition group">
+              <div key={item.id} className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm hover:border-[#0ea5e9] hover:shadow-md transition group">
                 <div className="flex items-center gap-4">
                   <div className="bg-red-50 p-3 rounded-lg text-red-500">
                     <FileText className="w-6 h-6" />
