@@ -59,7 +59,7 @@ class HasilUjianController extends Controller
     public function submit(Request $request, $id)
     {
         $request->validate([
-            'jawaban' => 'required|array' // Format: { soal_id: jawaban, ... }
+            'jawaban' => 'array' // Format: { soal_id: jawaban, ... } (boleh kosong jika belum dijawab)
         ]);
 
         $user_id = $request->user()->id;
@@ -69,7 +69,7 @@ class HasilUjianController extends Controller
             return response()->json(['message' => 'Anda sudah mengerjakan ujian ini'], 400);
         }
 
-        $jawaban_siswa = $request->jawaban;
+        $jawaban_siswa = $request->jawaban ?? [];
         $soal_ujian = \App\Models\Soal::where('ujian_id', $id)->get();
         
         $total_soal = $soal_ujian->count();

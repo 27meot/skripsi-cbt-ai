@@ -19,6 +19,9 @@ import argparse
 import fitz  # PyMuPDF
 from openai import OpenAI
 from dotenv import load_dotenv
+import math
+from collections import Counter
+import re
 
 # Load konfigurasi dari .env
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
@@ -35,13 +38,86 @@ def baca_pdf(file_path: str) -> str:
         doc = fitz.open(file_path)
         teks = ""
         for halaman in doc:
-            teks += halaman.get_text()
+            teks += halaman.get_text() + "\n"
         doc.close()
-        # Batasi panjang teks agar tidak melebihi limit token
-        return teks[:10000].strip()
+        return teks.strip()
     except Exception as e:
         print(json.dumps({"error": f"Gagal membaca PDF: {str(e)}"}))
         sys.exit(1)
+
+def chunk_text(text: str, chunk_size=3000, overlap=500) -> list:
+    """Memecah teks menjadi potongan-potongan (chunks) dengan overlapping."""
+    chunks = []
+    start = 0
+    while start < len(text):
+        chunks.append(text[start:start+chunk_size])
+        start += chunk_size - overlap
+    return chunks
+
+class SimpleTFIDFVectorDB:
+    """Implementasi Vector Database lokal yang sangat ringan menggunakan TF-IDF & Cosine Similarity."""
+    def __init__(self):
+        self.chunks = []
+        self.idf = {}
+        self.tf_idf_matrix = []
+
+    def _tokenize(self, text):
+        return re.findall(r'\w+', text.lower())
+
+    def add_texts(self, chunks):
+        self.chunks = chunks
+        N = len(chunks)
+        df = Counter()
+        tfs = []
+        
+        for chunk in chunks:
+            tokens = self._tokenize(chunk)
+            tf = Counter(tokens)
+            for token in set(tokens):
+                df[token] += 1
+            tfs.append(tf)
+
+        for token, count in df.items():
+            self.idf[token] = math.log((1 + N) / (1 + count)) + 1
+
+        for tf in tfs:
+            doc_len = sum(tf.values()) if sum(tf.values()) > 0 else 1
+            tfidf = {}
+            for token, count in tf.items():
+                tfidf[token] = (count / doc_len) * self.idf[token]
+            
+            norm = math.sqrt(sum(v**2 for v in tfidf.values()))
+            if norm > 0:
+                for k in tfidf:
+                    tfidf[k] /= norm
+            self.tf_idf_matrix.append(tfidf)
+
+    def search(self, query, top_k=5):
+        if not self.chunks:
+            return []
+            
+        query_tokens = self._tokenize(query)
+        query_tf = Counter(query_tokens)
+        query_len = sum(query_tf.values()) if sum(query_tf.values()) > 0 else 1
+        
+        query_tfidf = {}
+        for token, count in query_tf.items():
+            if token in self.idf:
+                query_tfidf[token] = (count / query_len) * self.idf[token]
+                
+        norm = math.sqrt(sum(v**2 for v in query_tfidf.values()))
+        if norm > 0:
+            for k in query_tfidf:
+                query_tfidf[k] /= norm
+
+        scores = []
+        for doc_idx, doc_tfidf in enumerate(self.tf_idf_matrix):
+            score = sum(query_tfidf.get(k, 0) * doc_tfidf.get(k, 0) for k in query_tfidf.keys())
+            scores.append((score, doc_idx))
+
+        scores.sort(reverse=True, key=lambda x: x[0])
+        top_indices = [idx for score, idx in scores[:min(top_k, len(self.chunks))]]
+        return [self.chunks[i] for i in top_indices]
 
 
 def generate_soal_dari_ai(teks_materi: str, konfigurasi: dict) -> list:
@@ -160,6 +236,23 @@ def main():
         print(json.dumps({"error": "Teks PDF terlalu pendek atau kosong. Pastikan PDF berisi teks, bukan gambar."}))
         sys.exit(1)
 
+    # === IMPLEMENTASI RAG (Retrieval-Augmented Generation) ===
+    sys.stderr.write("Memproses Chunking dan Vector Database (RAG)...\n")
+    chunks = chunk_text(teks_materi, chunk_size=3000, overlap=500)
+    
+    vector_db = SimpleTFIDFVectorDB()
+    vector_db.add_texts(chunks)
+    
+    # Query ke Vector DB untuk mencari konteks yang paling relevan
+    # Mengambil Top 10 chunk agar konteks hybrid tetap luas dan akurasi tinggi
+    query_pencarian = f"konsep utama, definisi penting, poin krusial, {args.tipe_soal}, ringkasan materi"
+    retrieved_chunks = vector_db.search(query_pencarian, top_k=10)
+    
+    # Satukan kembali chunk yang relevan (Hybrid Reassembly)
+    konteks_relevan = "\n...\n".join(retrieved_chunks)
+    # Batasi akhir untuk jaga-jaga limit token LLaMA3
+    konteks_relevan = konteks_relevan[:15000]
+
     # Step 2: Generate soal dengan AI
     sys.stderr.write(f"Menghubungi AI untuk membuat {args.jumlah_soal} soal...\n")
     konfigurasi = {
@@ -168,7 +261,7 @@ def main():
         "tipe_soal": args.tipe_soal,
         "instruksi": args.instruksi,
     }
-    soal_list = generate_soal_dari_ai(teks_materi, konfigurasi)
+    soal_list = generate_soal_dari_ai(konteks_relevan, konfigurasi)
 
     # Step 3: Output JSON ke stdout (Laravel akan menangkap ini)
     print(json.dumps({

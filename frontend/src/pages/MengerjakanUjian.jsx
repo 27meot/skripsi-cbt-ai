@@ -6,7 +6,7 @@ import api from '../services/api';
 export default function MengerjakanUjian() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [ujian, setUjian] = useState(null);
   const [soal, setSoal] = useState([]);
   const [jawaban, setJawaban] = useState({});
@@ -23,7 +23,7 @@ export default function MengerjakanUjian() {
         const response = await api.get(`/siswa/ujian/${id}/mulai`);
         setUjian(response.data.ujian);
         setSoal(response.data.soal);
-        
+
         // Inisialisasi waktu dari memori lokal (jika ada) atau durasi awal
         const savedTime = localStorage.getItem(`ujian_${id}_time`);
         const durasi = response.data.ujian.durasi_menit || 60;
@@ -66,7 +66,7 @@ export default function MengerjakanUjian() {
   // Timer effect
   useEffect(() => {
     if (loading || submitting || timeLeft <= 0) return;
-    
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -77,7 +77,7 @@ export default function MengerjakanUjian() {
         return prev - 1;
       });
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, [timeLeft, loading, submitting]);
 
@@ -92,7 +92,7 @@ export default function MengerjakanUjian() {
         e.preventDefault();
       }
     };
-    
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setCheatWarnings(prev => prev + 1);
@@ -134,7 +134,7 @@ export default function MengerjakanUjian() {
 
   const handleSubmit = async () => {
     if (submitting) return;
-    
+
     if (timeLeft > 0 && Object.keys(jawaban).length < soal.length) {
       if (!window.confirm('Masih ada soal yang belum dijawab. Yakin ingin mengumpulkan?')) {
         return;
@@ -144,7 +144,7 @@ export default function MengerjakanUjian() {
     setSubmitting(true);
     try {
       await api.post(`/siswa/ujian/${id}/submit`, { jawaban });
-      
+
       // Clear auto-save data karena sudah berhasil submit
       localStorage.removeItem(`ujian_${id}_jawaban`);
       localStorage.removeItem(`ujian_${id}_time`);
@@ -152,7 +152,8 @@ export default function MengerjakanUjian() {
       navigate('/siswa/riwayat');
     } catch (err) {
       console.error(err);
-      alert('Terjadi kesalahan saat mengumpulkan ujian.');
+      const errorMessage = err.response?.data?.message || 'Terjadi kesalahan saat mengumpulkan ujian.';
+      alert('Error Submit: ' + errorMessage);
       setSubmitting(false);
     }
   };
@@ -177,7 +178,7 @@ export default function MengerjakanUjian() {
         <h1 className="text-4xl font-bold mb-4">Peringatan Pelanggaran!</h1>
         <p className="text-xl mb-2">Anda terdeteksi meninggalkan halaman ujian atau membuka tab lain.</p>
         <p className="text-lg font-bold mb-8 text-yellow-300">Peringatan ke-{cheatWarnings} dari 3 maksimal.</p>
-        <button 
+        <button
           onClick={() => setShowWarningOverlay(false)}
           className="bg-white text-red-600 px-8 py-3 rounded-xl font-bold text-lg hover:bg-gray-100 transition shadow-lg"
         >
@@ -195,9 +196,8 @@ export default function MengerjakanUjian() {
           <h1 className="text-xl font-bold text-gray-800">{ujian.title}</h1>
           <p className="text-sm text-gray-500">Soal {currentIndex + 1} dari {soal.length}</p>
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-lg ${
-          timeLeft < 300 ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-blue-50 text-[#1176b6]'
-        }`}>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-lg ${timeLeft < 300 ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-blue-50 text-[#1176b6]'
+          }`}>
           <Clock className="w-5 h-5" />
           {formatTime(timeLeft)}
         </div>
@@ -224,15 +224,13 @@ export default function MengerjakanUjian() {
                     <button
                       key={i}
                       onClick={() => handlePilihJawaban(currentSoal.id, opt)}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition flex items-center gap-4 ${
-                        isSelected 
-                          ? 'border-[#1176b6] bg-blue-50' 
+                      className={`w-full text-left p-4 rounded-xl border-2 transition flex items-center gap-4 ${isSelected
+                          ? 'border-[#1176b6] bg-blue-50'
                           : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                        isSelected ? 'border-[#1176b6] bg-[#1176b6]' : 'border-gray-300'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-[#1176b6] bg-[#1176b6]' : 'border-gray-300'
+                        }`}>
                         {isSelected && <Check className="w-4 h-4 text-white" />}
                       </div>
                       <span className={`${isSelected ? 'text-[#1176b6] font-medium' : 'text-gray-700'}`}>
@@ -242,7 +240,7 @@ export default function MengerjakanUjian() {
                   );
                 })
               ) : (
-                <textarea 
+                <textarea
                   className="w-full p-4 border border-gray-200 rounded-xl outline-none focus:border-[#1176b6] focus:ring-1 focus:ring-[#1176b6] min-h-[150px]"
                   placeholder="Tuliskan jawaban Anda di sini..."
                   value={jawaban[currentSoal.id] || ''}
@@ -265,20 +263,19 @@ export default function MengerjakanUjian() {
                   <button
                     key={s.id}
                     onClick={() => setCurrentIndex(idx)}
-                    className={`h-12 rounded-lg font-medium border-2 flex items-center justify-center transition ${
-                      isActive 
-                        ? 'border-[#1176b6] text-[#1176b6] bg-blue-50' 
+                    className={`h-12 rounded-lg font-medium border-2 flex items-center justify-center transition ${isActive
+                        ? 'border-[#1176b6] text-[#1176b6] bg-blue-50'
                         : isAnswered
                           ? 'border-green-500 bg-green-500 text-white'
                           : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     {idx + 1}
                   </button>
                 );
               })}
             </div>
-            
+
             <div className="mt-8 pt-6 border-t flex flex-col gap-3">
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <div className="w-4 h-4 rounded-sm bg-green-500"></div> Sudah dijawab
@@ -291,14 +288,14 @@ export default function MengerjakanUjian() {
 
           <div className="p-4 border-t bg-gray-50 flex flex-col gap-3">
             <div className="flex gap-2">
-              <button 
+              <button
                 disabled={currentIndex === 0}
                 onClick={() => setCurrentIndex(prev => prev - 1)}
                 className="flex-1 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 disabled:opacity-50 flex items-center justify-center"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 disabled={currentIndex === soal.length - 1}
                 onClick={() => setCurrentIndex(prev => prev + 1)}
                 className="flex-1 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 disabled:opacity-50 flex items-center justify-center"
