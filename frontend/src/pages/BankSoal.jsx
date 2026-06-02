@@ -8,11 +8,14 @@ export default function BankSoal() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  
+
   // State untuk Edit Modal
   const [editingExam, setEditingExam] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDurasi, setEditDurasi] = useState(60);
+
+  // State untuk loading aksi individual (bukan fullscreen)
+  const [actionLoading, setActionLoading] = useState(null); // 'duplicate-{id}', 'save-edit'
 
   const fetchUjian = async () => {
     try {
@@ -42,12 +45,13 @@ export default function BankSoal() {
   const handleDuplicate = async (id) => {
     if (!window.confirm('Apakah Anda yakin ingin menduplikat ujian ini beserta seluruh soalnya?')) return;
     try {
-      setLoading(true);
+      setActionLoading(`duplicate-${id}`);
       await api.post(`/ujian/${id}/duplicate`);
       await fetchUjian();
     } catch (err) {
       alert('Gagal menduplikat ujian.');
-      setLoading(false);
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -59,7 +63,7 @@ export default function BankSoal() {
 
   const handleSaveEdit = async () => {
     try {
-      setLoading(true);
+      setActionLoading('save-edit');
       await api.put(`/ujian/${editingExam.id}`, {
         title: editTitle,
         durasi_menit: editDurasi
@@ -68,7 +72,8 @@ export default function BankSoal() {
       await fetchUjian();
     } catch (err) {
       alert('Gagal menyimpan perubahan.');
-      setLoading(false);
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -83,15 +88,15 @@ export default function BankSoal() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#f8fafc] relative">
-        
+
         {/* Search */}
         <div className="relative mb-6">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
           </div>
-          <input 
-            type="text" 
-            placeholder="Cari ujian..." 
+          <input
+            type="text"
+            placeholder="Cari ujian..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="block w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-1 focus:ring-[#0ea5e9] focus:border-[#0ea5e9] outline-none shadow-sm text-sm transition"
@@ -99,7 +104,7 @@ export default function BankSoal() {
         </div>
 
         {/* List of Exams */}
-        {loading && !editingExam ? (
+        {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#0ea5e9] animate-spin" />
           </div>
@@ -128,7 +133,7 @@ export default function BankSoal() {
                       <div className="bg-orange-50 border border-orange-100 px-4 py-2 rounded-xl flex items-center gap-3 shrink-0">
                         <div className="text-xs font-semibold text-orange-600 uppercase tracking-wide">Token Ujian</div>
                         <div className="text-lg font-mono font-bold text-orange-700 select-all">{exam.token || '------'}</div>
-                        <button 
+                        <button
                           onClick={() => { navigator.clipboard.writeText(exam.token); alert('Token berhasil disalin!'); }}
                           className="p-1.5 hover:bg-orange-200 text-orange-600 rounded-lg transition ml-1"
                           title="Salin Token"
@@ -139,7 +144,7 @@ export default function BankSoal() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-5 mt-3">
                   <Link to={`/review-soal?ujian_id=${exam.id}`} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 transition shadow-sm">
                     <Eye className="w-4 h-4" /> Lihat
@@ -147,10 +152,14 @@ export default function BankSoal() {
                   <button onClick={() => openEditModal(exam)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm">
                     <Edit3 className="w-4 h-4" /> Edit
                   </button>
-                  <button onClick={() => handleDuplicate(exam.id)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm">
-                    <Copy className="w-4 h-4" /> Duplikat
+                  <button
+                    onClick={() => handleDuplicate(exam.id)}
+                    disabled={actionLoading === `duplicate-${exam.id}`}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm disabled:opacity-50"
+                  >
+                    {actionLoading === `duplicate-${exam.id}` ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Duplikat
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDelete(exam.id)}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-100 rounded-lg hover:bg-red-50 transition shadow-sm"
                   >
@@ -170,25 +179,25 @@ export default function BankSoal() {
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold text-gray-900 text-xl">Edit Ujian</h3>
-              <button onClick={() => setEditingExam(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5"/></button>
+              <button onClick={() => setEditingExam(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nama Ujian</label>
-                <input 
-                  type="text" 
-                  value={editTitle} 
+                <input
+                  type="text"
+                  value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0ea5e9] focus:border-[#0ea5e9] outline-none"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Durasi (Menit)</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   min={1}
-                  value={editDurasi} 
+                  value={editDurasi}
                   onChange={(e) => setEditDurasi(e.target.value)}
                   className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0ea5e9] focus:border-[#0ea5e9] outline-none"
                 />
@@ -197,7 +206,14 @@ export default function BankSoal() {
 
             <div className="flex gap-3 mt-8">
               <button onClick={() => setEditingExam(null)} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition">Batal</button>
-              <button onClick={handleSaveEdit} className="flex-1 py-2.5 px-4 bg-[#0ea5e9] text-white rounded-xl font-medium hover:bg-[#0284c7] transition">Simpan Perubahan</button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={actionLoading === 'save-edit'}
+                className="flex-1 py-2.5 px-4 bg-[#0ea5e9] text-white rounded-xl font-medium hover:bg-[#0284c7] transition disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {actionLoading === 'save-edit' && <Loader2 className="w-4 h-4 animate-spin" />}
+                Simpan Perubahan
+              </button>
             </div>
           </div>
         </div>
