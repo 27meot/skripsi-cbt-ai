@@ -28,7 +28,7 @@ export default function Materi() {
     fetchMateri();
   }, []);
 
-  // Handle upload file PDF
+  // Proses upload file PDF
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -55,7 +55,7 @@ export default function Materi() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setSuccess('Materi berhasil diunggah!');
-      fetchMateri(); // Refresh daftar
+      fetchMateri();
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
@@ -64,12 +64,23 @@ export default function Materi() {
       }
     } finally {
       setUploading(false);
-      // Reset input file
+      // Reset input file supaya bisa upload ulang
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  // Handle hapus materi
+  // Buka file PDF di tab baru
+  const handleView = async (id) => {
+    try {
+      const response = await api.get(`/materi/${id}`, { responseType: 'blob' });
+      const fileURL = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      window.open(fileURL, '_blank');
+    } catch (err) {
+      setError('Gagal membuka file PDF.');
+    }
+  };
+
+  // Hapus materi
   const handleDelete = async (id) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus materi ini?')) return;
 
@@ -82,14 +93,14 @@ export default function Materi() {
     }
   };
 
-  // Format ukuran file
+  // Format ukuran file jadi KB/MB
   const formatSize = (bytes) => {
     if (!bytes) return '-';
     const mb = bytes / (1024 * 1024);
     return mb >= 1 ? `${mb.toFixed(1)} MB` : `${(bytes / 1024).toFixed(0)} KB`;
   };
 
-  // Filter pencarian
+  // Filter berdasarkan pencarian
   const filtered = materials.filter(m => 
     m.title.toLowerCase().includes(search.toLowerCase())
   );
@@ -102,13 +113,14 @@ export default function Materi() {
 
       <div className="flex-1 overflow-y-auto p-4 md:p-8">
         
-        {/* Notifikasi */}
+        {/* Pesan Error */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg mb-4 font-medium flex justify-between items-center">
             {error}
             <button onClick={() => setError('')}><X className="w-4 h-4" /></button>
           </div>
         )}
+        {/* Pesan Sukses */}
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-600 text-sm px-4 py-3 rounded-lg mb-4 font-medium flex justify-between items-center">
             {success}
@@ -116,7 +128,7 @@ export default function Materi() {
           </div>
         )}
 
-        {/* Upload Area */}
+        {/* Area Upload */}
         <div className="bg-white border-2 border-dashed border-gray-200 hover:border-blue-400 transition-colors rounded-2xl p-6 md:p-12 flex flex-col items-center justify-center mb-8 shadow-sm">
           <div className="bg-blue-50 text-blue-500 p-4 rounded-full mb-5">
             {uploading ? <Loader2 className="w-8 h-8 animate-spin" /> : <Upload className="w-8 h-8" />}
@@ -143,7 +155,7 @@ export default function Materi() {
           <p className="text-gray-400 text-xs mt-5">Maksimal 20MB per file • Format: PDF</p>
         </div>
 
-        {/* Search */}
+        {/* Kolom Pencarian */}
         <div className="relative mb-6">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
@@ -157,7 +169,7 @@ export default function Materi() {
           />
         </div>
 
-        {/* List of Materials */}
+        {/* Daftar Materi */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#0ea5e9] animate-spin" />
@@ -184,7 +196,10 @@ export default function Materi() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm">
+                  <button 
+                    onClick={() => handleView(item.id)}
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm"
+                  >
                     <Eye className="w-4 h-4" /> Lihat
                   </button>
                   <button 

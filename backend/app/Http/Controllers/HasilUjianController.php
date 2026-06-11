@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 class HasilUjianController extends Controller
 {
+    // Cek token ujian dari siswa
     public function cekToken(Request $request, $token)
     {
         $user_id = $request->user()->id;
@@ -31,13 +32,13 @@ class HasilUjianController extends Controller
         return response()->json($ujian);
     }
 
-    // 2. Mengambil soal untuk dikerjakan (tanpa kunci jawaban, khusus siswa)
+    // Ambil soal untuk dikerjakan siswa (tanpa kunci jawaban)
     public function mulaiUjian(Request $request, $id)
     {
         $ujian = \App\Models\Ujian::where('id', $id)->first();
         if (!$ujian) return response()->json(['message' => 'Ujian tidak ditemukan'], 404);
 
-        // Ambil soal tanpa correct_answer
+        // Ambil soal tanpa menampilkan jawaban benar
         $soal = \App\Models\Soal::where('ujian_id', $id)
             ->select('id', 'ujian_id', 'question_text', 'options')
             ->get()
@@ -55,16 +56,16 @@ class HasilUjianController extends Controller
         ]);
     }
 
-    // 3. Submit jawaban & hitung skor
+    // Submit jawaban siswa dan hitung skor
     public function submit(Request $request, $id)
     {
         $request->validate([
-            'jawaban' => 'array' // Format: { soal_id: jawaban, ... } (boleh kosong jika belum dijawab)
+            'jawaban' => 'array' // Format: { soal_id: jawaban, ... }
         ]);
 
         $user_id = $request->user()->id;
 
-        // Cek apakah sudah pernah submit
+        // Cek apakah sudah pernah mengerjakan
         if (\App\Models\HasilUjian::where('ujian_id', $id)->where('user_id', $user_id)->exists()) {
             return response()->json(['message' => 'Anda sudah mengerjakan ujian ini'], 400);
         }
@@ -101,7 +102,7 @@ class HasilUjianController extends Controller
         ]);
     }
 
-    // 4. Lihat riwayat ujian siswa
+    // Lihat riwayat ujian siswa
     public function riwayatSiswa(Request $request)
     {
         $riwayat = \App\Models\HasilUjian::where('user_id', $request->user()->id)
@@ -114,22 +115,22 @@ class HasilUjianController extends Controller
         return response()->json($riwayat);
     }
     
-    // 5. Laporan untuk Guru
+    // Laporan semua siswa untuk guru
     public function laporanSiswa(Request $request)
     {
         $guru_id = $request->user()->id;
 
-        // Ambil ID ujian yang dibuat oleh guru ini
+        // Ambil semua ujian milik guru ini
         $ujian_guru = \App\Models\Ujian::where('user_id', $guru_id)->pluck('id');
 
-        // Ambil semua hasil ujian untuk ujian-ujian tersebut
+        // Ambil semua hasil ujian dari ujian-ujian tersebut
         $hasil_ujians = \App\Models\HasilUjian::whereIn('ujian_id', $ujian_guru)
             ->with(['user' => function($q) {
                 $q->select('id', 'name', 'school');
             }])
             ->get();
 
-        // Kelompokkan berdasarkan siswa
+        // Kelompokkan berdasarkan siswa lalu hitung rata-rata
         $laporan = [];
         foreach ($hasil_ujians as $hasil) {
             $siswa_id = $hasil->user->id;
@@ -155,7 +156,7 @@ class HasilUjianController extends Controller
         return response()->json($hasil_akhir);
     }
 
-    // 6. Melihat riwayat ujian spesifik milik satu siswa (untuk guru)
+    // Lihat riwayat ujian satu siswa (untuk guru)
     public function riwayatSiswaAdmin(Request $request, $id)
     {
         $guru_id = $request->user()->id;
@@ -169,7 +170,7 @@ class HasilUjianController extends Controller
             ->orderBy('selesai_at', 'desc')
             ->get();
 
-        // Ambil data user
+        // Ambil data siswa
         $siswa = \App\Models\Pengguna::find($id);
             
         return response()->json([
@@ -178,7 +179,7 @@ class HasilUjianController extends Controller
         ]);
     }
 
-    // 7. Mengambil detail ujian siswa untuk dikoreksi (soal, kunci, jawaban siswa)
+    // Ambil detail ujian siswa untuk dikoreksi guru
     public function detailKoreksi(Request $request, $hasil_id)
     {
         $guru_id = $request->user()->id;
@@ -186,7 +187,7 @@ class HasilUjianController extends Controller
 
         if (!$hasil) return response()->json(['message' => 'Hasil ujian tidak ditemukan'], 404);
         
-        // Cek apakah guru berhak melihat (ujian milik guru tersebut)
+        // Cek apakah guru berhak melihat ujian ini
         if ($hasil->ujian->user_id !== $guru_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -203,7 +204,7 @@ class HasilUjianController extends Controller
         ]);
     }
 
-    // 8. Update nilai/skor setelah guru mengoreksi secara manual
+    // Update skor setelah guru koreksi manual
     public function updateSkor(Request $request, $hasil_id)
     {
         $request->validate([
@@ -223,7 +224,7 @@ class HasilUjianController extends Controller
         return response()->json(['message' => 'Skor berhasil diperbarui', 'skor' => $hasil->skor]);
     }
 
-    // 9. Menghapus riwayat ujian (Reset)
+    // Hapus riwayat ujian (reset)
     public function destroyAdmin(Request $request, $hasil_id)
     {
         $guru_id = $request->user()->id;

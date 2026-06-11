@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class UjianController extends Controller
 {
-    // Mengambil daftar ujian untuk halaman Bank Soal
+    // Ambil semua ujian untuk halaman Bank Soal
     public function index(Request $request)
     {
         $ujian = Ujian::where('user_id', $request->user()->id)
@@ -19,7 +19,7 @@ class UjianController extends Controller
         return response()->json($ujian);
     }
 
-    // Menyimpan konfigurasi ujian (Trigger pembuatan soal AI nantinya)
+    // Simpan ujian baru
     public function store(Request $request)
     {
         $request->validate([
@@ -32,7 +32,7 @@ class UjianController extends Controller
             'instruksi' => 'nullable|string'
         ]);
 
-        // Verifikasi kepemilikan materi
+        // Cek apakah materi ini milik user yang sedang login
         $materi = Materi::where('id', $request->materi_id)
                       ->where('user_id', $request->user()->id)
                       ->first();
@@ -41,7 +41,7 @@ class UjianController extends Controller
             return response()->json(['message' => 'Materi tidak valid'], 404);
         }
 
-        // Simpan konfigurasi
+        // Simpan data ujian ke database
         $ujian = Ujian::create([
             'user_id' => $request->user()->id,
             'materi_id' => $request->materi_id,
@@ -62,7 +62,7 @@ class UjianController extends Controller
         ], 201);
     }
 
-    // Mengambil detail satu ujian beserta daftar soalnya
+    // Ambil detail satu ujian beserta soalnya
     public function show(Request $request, $id)
     {
         $ujian = Ujian::where('id', $id)
@@ -77,7 +77,7 @@ class UjianController extends Controller
         return response()->json($ujian);
     }
 
-    // Mengubah detail ujian (Edit)
+    // Edit data ujian
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -96,19 +96,19 @@ class UjianController extends Controller
         return response()->json(['message' => 'Ujian berhasil diupdate', 'data' => $ujian]);
     }
 
-    // Menduplikasi ujian beserta soalnya
+    // Duplikat ujian beserta semua soalnya
     public function duplicate(Request $request, $id)
     {
         $ujian = Ujian::where('id', $id)->where('user_id', $request->user()->id)->with('soal')->first();
         if (!$ujian) return response()->json(['message' => 'Ujian tidak ditemukan'], 404);
 
-        // Copy Ujian
+        // Salin ujian
         $newUjian = $ujian->replicate();
         $newUjian->title = $ujian->title . ' (Copy)';
         $newUjian->token = strtoupper(\Illuminate\Support\Str::random(6));
         $newUjian->save();
 
-        // Copy Soal
+        // Salin semua soal ke ujian baru
         foreach ($ujian->soal as $soal) {
             $newSoal = $soal->replicate();
             $newSoal->ujian_id = $newUjian->id;
@@ -118,7 +118,7 @@ class UjianController extends Controller
         return response()->json(['message' => 'Ujian berhasil diduplikasi', 'data' => $newUjian]);
     }
 
-    // Menghapus ujian beserta soalnya
+    // Hapus ujian
     public function destroy(Request $request, $id)
     {
         $ujian = Ujian::where('id', $id)->where('user_id', $request->user()->id)->first();

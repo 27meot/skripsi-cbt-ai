@@ -9,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    // Daftar akun baru
     public function register(Request $request)
     {
         $request->validate([
@@ -22,7 +23,7 @@ class AuthController extends Controller
         $user = Pengguna::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password, // Model cast 'hashed' will auto-hash
+            'password' => $request->password, // Model otomatis hash password
             'role' => $request->role,
             'school' => $request->school,
         ]);
@@ -36,6 +37,7 @@ class AuthController extends Controller
         ], 201);
     }
 
+    // Login
     public function login(Request $request)
     {
         $request->validate([
@@ -60,6 +62,7 @@ class AuthController extends Controller
         ]);
     }
 
+    // Keluar (hapus token)
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();

@@ -9,7 +9,7 @@ export default function AdminLayout({ children }) {
   const currentPath = location.pathname;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Ambil data user dari localStorage
+  // Ambil data user dari penyimpanan lokal
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const menuItems = [
@@ -24,7 +24,7 @@ export default function AdminLayout({ children }) {
     try {
       await api.post('/logout');
     } catch (err) {
-      // Tetap logout meskipun API gagal
+      // Tetap logout walau API gagal
     }
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
@@ -37,7 +37,7 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="flex h-screen bg-[#f8fafc] font-sans overflow-hidden">
-      {/* Mobile Header Bar */}
+      {/* Header untuk HP/Tablet */}
       <div className="fixed top-0 left-0 right-0 h-14 bg-[#1a2b3c] text-white flex items-center px-4 z-40 lg:hidden">
         <button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-white/10 rounded-lg transition">
           <Menu className="w-5 h-5" />
@@ -50,7 +50,7 @@ export default function AdminLayout({ children }) {
         </div>
       </div>
 
-      {/* Backdrop overlay for mobile */}
+      {/* Latar belakang gelap saat sidebar terbuka di HP */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -58,7 +58,7 @@ export default function AdminLayout({ children }) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar Menu */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-[#1a2b3c] text-white flex flex-col justify-between shrink-0
         transform transition-transform duration-300 ease-in-out
@@ -103,7 +103,7 @@ export default function AdminLayout({ children }) {
           </nav>
         </div>
 
-        {/* User profile & Logout */}
+        {/* Profil & Tombol Keluar */}
         <div className="p-4 border-t border-white/10">
           <div className="px-3 py-2 mb-2">
             <p className="text-xs text-gray-400 truncate">{user.email || 'user@email.com'}</p>
@@ -118,7 +118,7 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Konten Utama */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative pt-14 lg:pt-0">
         {children}
       </main>

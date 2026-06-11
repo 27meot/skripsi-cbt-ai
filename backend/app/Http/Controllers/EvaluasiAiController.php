@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 class EvaluasiAiController extends Controller
 {
+    // Simpan evaluasi dari guru
     public function store(Request $request)
     {
         $request->validate([
@@ -37,6 +38,7 @@ class EvaluasiAiController extends Controller
         ], 201);
     }
 
+    // Ambil rata-rata statistik evaluasi
     public function stats()
     {
         $stats = \App\Models\EvaluasiAi::selectRaw('

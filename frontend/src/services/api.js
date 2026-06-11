@@ -8,7 +8,7 @@ const api = axios.create({
   }
 });
 
-// Otomatis menyisipkan token ke setiap request
+// Otomatis sisipkan token ke setiap request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) {
@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Otomatis redirect ke login jika token expired
+// Otomatis arahkan ke halaman login jika token sudah kadaluarsa
 api.interceptors.response.use(
   (response) => response,
   (error) => {

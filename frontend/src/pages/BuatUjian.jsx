@@ -81,7 +81,7 @@ export default function BuatUjian() {
         
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-8 w-full">
           
-          {/* Header */}
+          {/* Judul Halaman */}
           <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
             <div className="bg-[#f0f9fa] p-3 rounded-xl text-[#0ea5e9]">
               <Settings2 className="w-6 h-6" />

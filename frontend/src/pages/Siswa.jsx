@@ -49,7 +49,7 @@ export default function Siswa() {
           />
         </div>
 
-        {/* Desktop Table */}
+        {/* Tabel untuk Desktop */}
         <div className="hidden md:block bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -104,7 +104,7 @@ export default function Siswa() {
           </table>
         </div>
 
-        {/* Mobile Card View */}
+        {/* Tampilan Kartu untuk HP */}
         <div className="md:hidden space-y-3">
           {loading ? (
             <div className="text-center py-8 text-gray-500">Memuat data siswa...</div>

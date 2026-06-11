@@ -9,12 +9,12 @@ use Illuminate\Http\Request;
 class SoalController extends Controller
 {
     /**
-     * Trigger skrip Python AI untuk generate soal dari PDF.
-     * Python mengembalikan JSON ke stdout, Laravel menyimpan ke database.
+     * Jalankan skrip Python AI untuk membuat soal dari PDF.
+     * Python mengembalikan JSON, lalu Laravel simpan ke database.
      */
     public function generate(Request $request, $ujian_id)
     {
-        // Naikkan batas waktu eksekusi PHP (AI butuh waktu ~15 menit jika server AI sedang lambat)
+        // Naikkan batas waktu PHP (AI butuh waktu lama jika server lambat)
         set_time_limit(900);
 
         $ujian = Ujian::where('id', $ujian_id)
@@ -30,29 +30,29 @@ class SoalController extends Controller
             return response()->json(['message' => 'Materi tidak ditemukan.'], 404);
         }
 
-        // Path lengkap ke file PDF
+        // Lokasi file PDF
         $filePath = storage_path('app/public/' . $ujian->materi->file_path);
 
         if (!file_exists($filePath)) {
             return response()->json(['message' => 'File PDF materi tidak ditemukan di server.'], 404);
         }
 
-        // Ambil setting dari ujian
+        // Ambil pengaturan AI dari ujian
         $aiSettings = $ujian->ai_settings ?? [];
         $jumlahSoal = $aiSettings['jumlah_soal'] ?? 5;
         $difficulty  = $ujian->difficulty ?? 'sedang';
         $tipeSoal    = $aiSettings['tipe_soal'] ?? 'pilihan_ganda';
         $instruksi   = $aiSettings['instruksi'] ?? '';
 
-        // Path ke skrip Python AI
+        // Lokasi skrip Python AI
         $pythonScript = base_path('../ai_service/generate_soal.py');
 
-        // Deteksi OS untuk kompatibilitas Windows & Linux
+        // Deteksi sistem operasi (Windows atau Linux)
         $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
         $pythonBin = $isWindows ? 'python' : base_path('../ai_service/venv/bin/python3');
         $nullDevice = $isWindows ? 'NUL' : '/dev/null';
 
-        // Bangun command (stderr dibuang agar stdout bersih JSON)
+        // Buat perintah (stderr dibuang agar output JSON bersih)
         $command = sprintf(
             '%s %s --file_path=%s --jumlah_soal=%d --difficulty=%s --tipe_soal=%s --instruksi=%s 2>%s',
             escapeshellarg($pythonBin),
@@ -68,7 +68,7 @@ class SoalController extends Controller
         $output = shell_exec($command);
 
         if (!$output) {
-            // Coba lagi dengan stderr ditangkap untuk debugging
+            // Coba ulang dengan menangkap error untuk debugging
             $debugCommand = preg_replace('/2>[^ ]+$/', '2>&1', $command);
             $debugOutput = shell_exec($debugCommand);
             return response()->json([
@@ -77,7 +77,7 @@ class SoalController extends Controller
             ], 500);
         }
 
-        // Ambil baris terakhir yang berisi JSON valid
+        // Ambil baris terakhir yang berisi JSON
         $lines = array_filter(explode("\n", trim($output)));
         $jsonLine = end($lines);
         $result = json_decode(trim($jsonLine), true);
@@ -94,10 +94,10 @@ class SoalController extends Controller
             return response()->json(['message' => 'Format output AI tidak sesuai.', 'raw' => $output], 500);
         }
 
-        // Hapus soal lama jika ada
+        // Hapus soal lama kalau ada
         Soal::where('ujian_id', $ujian_id)->delete();
 
-        // Simpan soal baru langsung ke database
+        // Simpan soal baru ke database
         $soalBaru = [];
         foreach ($result['soal'] as $item) {
             $soalBaru[] = Soal::create([
@@ -117,7 +117,7 @@ class SoalController extends Controller
     }
 
     /**
-     * Mengambil semua soal untuk satu ujian.
+     * Ambil semua soal untuk satu ujian.
      */
     public function index(Request $request, $ujian_id)
     {
@@ -139,7 +139,7 @@ class SoalController extends Controller
     }
 
     /**
-     * Menghapus satu soal.
+     * Hapus satu soal.
      */
     public function destroy(Request $request, $soal_id)
     {

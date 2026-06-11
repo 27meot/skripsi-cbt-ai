@@ -9,13 +9,13 @@ export default function BankSoal() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  // State untuk Edit Modal
+  // State untuk modal edit
   const [editingExam, setEditingExam] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDurasi, setEditDurasi] = useState(60);
 
-  // State untuk loading aksi individual (bukan fullscreen)
-  const [actionLoading, setActionLoading] = useState(null); // 'duplicate-{id}', 'save-edit'
+  // State loading per tombol (bukan loading seluruh halaman)
+  const [actionLoading, setActionLoading] = useState(null); // contoh: 'duplicate-5', 'save-edit'
 
   const fetchUjian = async () => {
     try {
@@ -89,7 +89,7 @@ export default function BankSoal() {
 
       <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#f8fafc] relative">
 
-        {/* Search */}
+        {/* Pencarian */}
         <div className="relative mb-6">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
@@ -103,7 +103,7 @@ export default function BankSoal() {
           />
         </div>
 
-        {/* List of Exams */}
+        {/* Daftar Ujian */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#0ea5e9] animate-spin" />
@@ -173,7 +173,7 @@ export default function BankSoal() {
 
       </div>
 
-      {/* Edit Modal */}
+      {/* Modal Edit Ujian */}
       {editingExam && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">

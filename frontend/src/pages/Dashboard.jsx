@@ -67,13 +67,13 @@ export default function Dashboard() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 md:p-8">
-        {/* Greeting */}
+        {/* Sapaan */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Selamat datang, {user.name || 'Pengguna'}! 👋</h2>
           <p className="text-gray-500 mt-1">Berikut ringkasan data Anda saat ini.</p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Kartu Statistik */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {cards.map((card) => {
             const Icon = card.icon;
@@ -94,7 +94,7 @@ export default function Dashboard() {
           })}
         </div>
         
-        {/* UAT Report Section */}
+        {/* Bagian Laporan UAT */}
         {evalStats && (
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-8">
             <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">

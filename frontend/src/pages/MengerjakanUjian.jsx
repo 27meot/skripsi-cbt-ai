@@ -257,7 +257,7 @@ export default function MengerjakanUjian() {
             </div>
           </div>
 
-          {/* Mobile Navigation Buttons (below question) */}
+          {/* Tombol Navigasi untuk HP (di bawah soal) */}
           <div className="lg:hidden mt-4 flex gap-2 max-w-4xl mx-auto">
             <button
               disabled={currentIndex === 0}
@@ -276,7 +276,7 @@ export default function MengerjakanUjian() {
           </div>
         </div>
 
-        {/* Desktop Sidebar Navigasi Soal */}
+        {/* Sidebar Navigasi Soal (hanya Desktop) */}
         <div className="w-72 bg-white border-l shadow-sm flex-col shrink-0 hidden lg:flex">
           <div className="p-4 border-b font-medium text-gray-700">Navigasi Soal</div>
           <div className="p-4 flex-1 overflow-y-auto">
@@ -339,7 +339,7 @@ export default function MengerjakanUjian() {
         </div>
       </div>
 
-      {/* Mobile Floating Action Bar */}
+      {/* Tombol Aksi di bawah layar HP */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-[0_-4px_20px_rgb(0,0,0,0.08)] px-4 py-3 flex items-center gap-3 z-30">
         <button
           onClick={() => setShowNavDrawer(true)}
@@ -357,7 +357,7 @@ export default function MengerjakanUjian() {
         </button>
       </div>
 
-      {/* Mobile Navigation Drawer (Bottom Sheet) */}
+      {/* Panel Navigasi Soal dari bawah (HP) */}
       {showNavDrawer && (
         <>
           <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setShowNavDrawer(false)} />
@@ -402,7 +402,7 @@ export default function MengerjakanUjian() {
         </>
       )}
 
-      {/* Animation CSS */}
+      {/* Animasi CSS */}
       <style>{`
         @keyframes slide-up {
           from { transform: translateY(100%); }
