@@ -82,7 +82,7 @@ export default function MengerjakanUjian() {
     return () => clearInterval(timer);
   }, [timeLeft, loading, submitting]);
 
-  // Sistem Anti-Curang
+  // Sistem Anti-Curang (kompatibel Windows & macOS)
   useEffect(() => {
     if (loading || submitting || timeLeft <= 0) return;
 
@@ -95,53 +95,102 @@ export default function MengerjakanUjian() {
       setShowWarningOverlay(true);
     };
 
+    // Fungsi untuk masuk fullscreen (kompatibel semua browser)
+    const masukFullscreen = () => {
+      const el = document.documentElement;
+      try {
+        if (el.requestFullscreen) {
+          el.requestFullscreen();
+        } else if (el.webkitRequestFullscreen) {
+          // Safari
+          el.webkitRequestFullscreen();
+        } else if (el.msRequestFullscreen) {
+          // IE/Edge lama
+          el.msRequestFullscreen();
+        }
+      } catch (err) {}
+    };
+
+    // Fungsi untuk keluar fullscreen (kompatibel semua browser)
+    const keluarFullscreen = () => {
+      try {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      } catch (err) {}
+    };
+
+    // Cek apakah sedang dalam mode fullscreen
+    const isFullscreen = () => {
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+    };
+
     // 1. Blokir klik kanan
     const handleContextMenu = (e) => e.preventDefault();
 
     // 2. Blokir copy, cut, paste
     const handleCopyPaste = (e) => e.preventDefault();
 
-    // 3. Blokir shortcut keyboard berbahaya
+    // 3. Blokir shortcut keyboard (Windows: Ctrl, macOS: Cmd)
     const handleKeyDown = (e) => {
-      // Blokir Ctrl+C/V/X (copy/paste/cut)
-      if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'x')) {
+      const isMod = e.ctrlKey || e.metaKey; // Ctrl di Windows, Cmd di Mac
+
+      // Blokir Ctrl/Cmd+C/V/X (copy/paste/cut)
+      if (isMod && (e.key === 'c' || e.key === 'v' || e.key === 'x')) {
         e.preventDefault();
       }
       // Blokir F12 (DevTools)
       if (e.key === 'F12') {
         e.preventDefault();
       }
-      // Blokir Alt+Tab (pindah aplikasi)
-      if (e.altKey && e.key === 'Tab') {
+      // Blokir Alt+Tab (Windows) & Cmd+Tab (Mac) - pindah aplikasi
+      if ((e.altKey && e.key === 'Tab') || (e.metaKey && e.key === 'Tab')) {
         e.preventDefault();
       }
-      // Blokir tombol Windows/Meta
+      // Blokir tombol Windows/Cmd
       if (e.key === 'Meta' || e.key === 'OS') {
         e.preventDefault();
       }
-      // Blokir Ctrl+Tab (pindah tab browser)
-      if (e.ctrlKey && e.key === 'Tab') {
+      // Blokir Ctrl/Cmd+Tab (pindah tab browser)
+      if (isMod && e.key === 'Tab') {
         e.preventDefault();
       }
-      // Blokir Ctrl+W (tutup tab)
-      if (e.ctrlKey && e.key === 'w') {
+      // Blokir Ctrl/Cmd+W (tutup tab)
+      if (isMod && e.key === 'w') {
         e.preventDefault();
       }
-      // Blokir Ctrl+N (buka jendela baru)
-      if (e.ctrlKey && e.key === 'n') {
+      // Blokir Ctrl/Cmd+N (buka jendela baru)
+      if (isMod && e.key === 'n') {
         e.preventDefault();
       }
-      // Blokir Ctrl+Shift+I (DevTools)
-      if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+      // Blokir Ctrl/Cmd+T (buka tab baru)
+      if (isMod && e.key === 't') {
         e.preventDefault();
       }
-      // Blokir Escape (keluar fullscreen) - minta tetap di fullscreen
+      // Blokir Ctrl/Cmd+Shift+I (DevTools)
+      if (isMod && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+      }
+      // Blokir Cmd+Q (tutup aplikasi di Mac)
+      if (e.metaKey && e.key === 'q') {
+        e.preventDefault();
+      }
+      // Blokir Cmd+H (sembunyikan aplikasi di Mac)
+      if (e.metaKey && e.key === 'h') {
+        e.preventDefault();
+      }
+      // Blokir Cmd+M (minimize di Mac)
+      if (e.metaKey && e.key === 'm') {
+        e.preventDefault();
+      }
+      // Blokir Escape (keluar fullscreen) - minta tetap fullscreen
       if (e.key === 'Escape') {
         e.preventDefault();
-        // Coba masuk fullscreen lagi
-        try {
-          document.documentElement.requestFullscreen?.();
-        } catch (err) {}
+        masukFullscreen();
       }
     };
 
@@ -157,15 +206,13 @@ export default function MengerjakanUjian() {
       addWarning();
     };
 
-    // 6. Deteksi keluar dari fullscreen
+    // 6. Deteksi keluar dari fullscreen (semua browser termasuk Safari)
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
+      if (!isFullscreen()) {
         addWarning();
         // Coba masuk fullscreen lagi setelah user kembali
         setTimeout(() => {
-          try {
-            document.documentElement.requestFullscreen?.();
-          } catch (err) {}
+          masukFullscreen();
         }, 500);
       }
     };
@@ -179,10 +226,8 @@ export default function MengerjakanUjian() {
       }
     };
 
-    // Coba aktifkan fullscreen saat ujian dimulai
-    try {
-      document.documentElement.requestFullscreen?.();
-    } catch (err) {}
+    // Aktifkan fullscreen saat ujian dimulai
+    masukFullscreen();
 
     // Pasang semua pendeteksi
     document.addEventListener('contextmenu', handleContextMenu);
@@ -192,6 +237,7 @@ export default function MengerjakanUjian() {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
     window.addEventListener('blur', handleWindowBlur);
     window.addEventListener('resize', handleResize);
 
@@ -203,12 +249,13 @@ export default function MengerjakanUjian() {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange); // Safari
       window.removeEventListener('blur', handleWindowBlur);
       window.removeEventListener('resize', handleResize);
 
       // Keluar fullscreen saat selesai
-      if (document.fullscreenElement) {
-        document.exitFullscreen?.();
+      if (isFullscreen()) {
+        keluarFullscreen();
       }
     };
   }, [loading, submitting, timeLeft]);
