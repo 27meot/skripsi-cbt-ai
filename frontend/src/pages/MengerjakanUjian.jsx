@@ -82,31 +82,118 @@ export default function MengerjakanUjian() {
     return () => clearInterval(timer);
   }, [timeLeft, loading, submitting]);
 
-  // Anti-Cheat System
+  // Sistem Anti-Curang
   useEffect(() => {
     if (loading || submitting || timeLeft <= 0) return;
 
+    // Simpan ukuran awal layar untuk deteksi split screen
+    const initialWidth = window.screen.width;
+
+    // Fungsi untuk menambah peringatan
+    const addWarning = () => {
+      setCheatWarnings(prev => prev + 1);
+      setShowWarningOverlay(true);
+    };
+
+    // 1. Blokir klik kanan
     const handleContextMenu = (e) => e.preventDefault();
+
+    // 2. Blokir copy, cut, paste
     const handleCopyPaste = (e) => e.preventDefault();
+
+    // 3. Blokir shortcut keyboard berbahaya
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'x')) || e.key === 'F12') {
+      // Blokir Ctrl+C/V/X (copy/paste/cut)
+      if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'x')) {
         e.preventDefault();
       }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setCheatWarnings(prev => prev + 1);
-        setShowWarningOverlay(true);
+      // Blokir F12 (DevTools)
+      if (e.key === 'F12') {
+        e.preventDefault();
+      }
+      // Blokir Alt+Tab (pindah aplikasi)
+      if (e.altKey && e.key === 'Tab') {
+        e.preventDefault();
+      }
+      // Blokir tombol Windows/Meta
+      if (e.key === 'Meta' || e.key === 'OS') {
+        e.preventDefault();
+      }
+      // Blokir Ctrl+Tab (pindah tab browser)
+      if (e.ctrlKey && e.key === 'Tab') {
+        e.preventDefault();
+      }
+      // Blokir Ctrl+W (tutup tab)
+      if (e.ctrlKey && e.key === 'w') {
+        e.preventDefault();
+      }
+      // Blokir Ctrl+N (buka jendela baru)
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+      }
+      // Blokir Ctrl+Shift+I (DevTools)
+      if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+      }
+      // Blokir Escape (keluar fullscreen) - minta tetap di fullscreen
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        // Coba masuk fullscreen lagi
+        try {
+          document.documentElement.requestFullscreen?.();
+        } catch (err) {}
       }
     };
 
+    // 4. Deteksi tab tersembunyi (pindah tab di browser)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        addWarning();
+      }
+    };
+
+    // 5. Deteksi kehilangan fokus (klik ke aplikasi lain, split screen)
+    const handleWindowBlur = () => {
+      addWarning();
+    };
+
+    // 6. Deteksi keluar dari fullscreen
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        addWarning();
+        // Coba masuk fullscreen lagi setelah user kembali
+        setTimeout(() => {
+          try {
+            document.documentElement.requestFullscreen?.();
+          } catch (err) {}
+        }, 500);
+      }
+    };
+
+    // 7. Deteksi ukuran layar berubah drastis (split screen/snap)
+    const handleResize = () => {
+      const currentWidth = window.innerWidth;
+      // Jika lebar jendela kurang dari 80% layar, kemungkinan split screen
+      if (currentWidth < initialWidth * 0.8) {
+        addWarning();
+      }
+    };
+
+    // Coba aktifkan fullscreen saat ujian dimulai
+    try {
+      document.documentElement.requestFullscreen?.();
+    } catch (err) {}
+
+    // Pasang semua pendeteksi
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('copy', handleCopyPaste);
     document.addEventListener('cut', handleCopyPaste);
     document.addEventListener('paste', handleCopyPaste);
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('resize', handleResize);
 
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu);
@@ -115,6 +202,14 @@ export default function MengerjakanUjian() {
       document.removeEventListener('paste', handleCopyPaste);
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('resize', handleResize);
+
+      // Keluar fullscreen saat selesai
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.();
+      }
     };
   }, [loading, submitting, timeLeft]);
 
@@ -183,7 +278,13 @@ export default function MengerjakanUjian() {
       <div className="flex h-screen items-center justify-center bg-red-600 text-white p-8 z-50 fixed inset-0 flex-col text-center">
         <AlertTriangle className="w-16 h-16 md:w-24 md:h-24 mb-6 animate-pulse" />
         <h1 className="text-2xl md:text-4xl font-bold mb-4">Peringatan Pelanggaran!</h1>
-        <p className="text-base md:text-xl mb-2">Anda terdeteksi meninggalkan halaman ujian atau membuka tab lain.</p>
+        <p className="text-base md:text-xl mb-2">Anda terdeteksi melakukan salah satu hal berikut:</p>
+        <ul className="text-sm md:text-base mb-4 text-left max-w-md mx-auto space-y-1">
+          <li>• Membuka aplikasi lain / berpindah jendela</li>
+          <li>• Membagi layar (split screen)</li>
+          <li>• Berpindah tab browser</li>
+          <li>• Keluar dari mode layar penuh</li>
+        </ul>
         <p className="text-sm md:text-lg font-bold mb-8 text-yellow-300">Peringatan ke-{cheatWarnings} dari 3 maksimal.</p>
         <button
           onClick={() => setShowWarningOverlay(false)}

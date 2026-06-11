@@ -70,13 +70,12 @@ export default function Materi() {
   };
 
   // Buka file PDF di tab baru
-  const handleView = async (id) => {
-    try {
-      const response = await api.get(`/materi/${id}`, { responseType: 'blob' });
-      const fileURL = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      window.open(fileURL, '_blank');
-    } catch (err) {
-      setError('Gagal membuka file PDF.');
+  const handleView = (item) => {
+    if (item.file_path) {
+      const backendURL = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
+      window.open(`${backendURL}/storage/${item.file_path}`, '_blank');
+    } else {
+      setError('File PDF tidak ditemukan.');
     }
   };
 
@@ -197,7 +196,7 @@ export default function Materi() {
                 </div>
                 <div className="flex gap-2">
                   <button 
-                    onClick={() => handleView(item.id)}
+                    onClick={() => handleView(item)}
                     className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm"
                   >
                     <Eye className="w-4 h-4" /> Lihat
